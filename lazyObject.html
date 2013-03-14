@@ -1,0 +1,61 @@
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="http://pivotal.github.com/jasmine/lib/jasmine.css"></link>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+
+    <script type="text/javascript">
+        var lazyObject = function(properties) {
+            // Object constructor code
+            var deferreds = {};
+
+            _.each(properties, function(propertyName, i) {
+                deferreds[propertyName] = $.Deferred();
+            }, this);
+
+            return {
+                with: function(props, callback, scope) {
+                    var deferredValues = _.filter(
+                        _.map(
+                            deferreds,
+                            function(deferred, propName) {
+                                if (props.indexOf(propName) > -1) {
+                                    return deferred;
+                                }
+                            }
+                        ),
+                        function(deferred) {
+                            return !_.isUndefined(deferred);
+                        }
+                    );
+
+                    $.when.apply(null, deferredValues).done(function() {
+                        callback.apply(scope, arguments);
+                    });
+                },
+
+                set: function(prop, value) {
+                    deferreds[prop].resolve(value);
+                }
+            };
+        }
+
+        $(function() {
+            var l = lazyObject(['lazy', 'sleepy']);
+
+            l.set('lazy', 'laaaaaazy');
+
+            l.with(['lazy', 'sleepy'], function(lazy, sleepy) {
+                console.log(lazy, sleepy);
+            }, window);
+
+            setTimeout(function() {
+                l.set('sleepy', 'wheee');
+            }, 1000);
+        });
+    </script>
+</head>
+<body>
+</body>
+</html>
