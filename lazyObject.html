@@ -23,12 +23,14 @@
             });
 
             setTimeout(function() {
-                l.set({'sleepy': 'wheee'});
+                l.set({'sleepy': 'sleepy'});
 
-                l.with(['lazy', 'sleepy'],'dadada' /*function(lazy, sleepy) {
+                l.with(['lazy', 'sleepy'],function(lazy, sleepy) {
                     console.log(lazy, sleepy);
-                }*/);
+                });
             }, 1000);
+
+            l.with('lazy', 'aaaa');
         });
     </script>
 </head>
