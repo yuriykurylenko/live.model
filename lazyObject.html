@@ -1,58 +1,40 @@
 <html>
 <head>
-    <link rel="stylesheet" type="text/css" href="http://pivotal.github.com/jasmine/lib/jasmine.css"></link>
-
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
 
+    <script src="lazyObject.js"></script>
     <script type="text/javascript">
-        var lazyObject = function(properties) {
-            // Object constructor code
-            var deferreds = {};
-
-            _.each(properties, function(propertyName, i) {
-                deferreds[propertyName] = $.Deferred();
-            }, this);
-
-            return {
-                with: function(props, callback, scope) {
-                    var deferredValues = _.filter(
-                        _.map(
-                            deferreds,
-                            function(deferred, propName) {
-                                if (props.indexOf(propName) > -1) {
-                                    return deferred;
-                                }
-                            }
-                        ),
-                        function(deferred) {
-                            return !_.isUndefined(deferred);
-                        }
-                    );
-
-                    $.when.apply(null, deferredValues).done(function() {
-                        callback.apply(scope, arguments);
-                    });
-                },
-
-                set: function(prop, value) {
-                    deferreds[prop].resolve(value);
-                }
-            };
-        }
-
         $(function() {
-            var l = lazyObject(['lazy', 'sleepy']);
+            var l = lazyObject();
 
+            l.set('sleepy', 'wheee1');
             l.set('lazy', 'laaaaaazy');
 
-            l.with(['lazy', 'sleepy'], function(lazy, sleepy) {
-                console.log(lazy, sleepy);
+            l.with('sleepy', function(sleepy) {
+                console.log(sleepy);
             }, window);
+
+            l.with('lazy', function(lazy) {
+                console.log(lazy);
+            });
 
             setTimeout(function() {
                 l.set('sleepy', 'wheee');
+
+                l.with(['lazy', 'sleepy'], function(lazy, sleepy) {
+                    console.log(lazy, sleepy);
+                });
             }, 1000);
+
+            /*var d = $.Deferred();
+
+            d.resolve(1);
+            d.resolve(2);
+
+            d.done(function(v) {
+                console.log(v);
+            });*/
         });
     </script>
 </head>
