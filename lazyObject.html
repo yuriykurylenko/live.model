@@ -9,8 +9,10 @@
         $(function() {
             var l = lazyObject();
 
-            l.set('sleepy', 'wheee1');
-            l.set('lazy', 'laaaaaazy');
+            l.set({
+                'sleepy': 'wheee1',
+                'lazy': 'laaaaaazy'
+            });
 
             l.with('sleepy', function(sleepy) {
                 console.log(sleepy);
@@ -21,7 +23,7 @@
             });
 
             setTimeout(function() {
-                l.set('sleepy', 'wheee');
+                l.set({'sleepy': 'wheee'});
 
                 l.with(['lazy', 'sleepy'], function(lazy, sleepy) {
                     console.log(lazy, sleepy);

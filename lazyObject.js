@@ -7,9 +7,7 @@ var lazyObject = function() {
             if (_.isString(props)) {
                 props = [ props ];
             } else if (!_.isArray(props)) {
-                throw new Error(
-                    'Error in lazyObject.with(): "property/properties list" value should be a string or an array!'
-                );
+                throw new Error('Error in lazyObject.with(): first argument should be a string or an array!');
             }
 
             var deferredValues = _.map(props, function(propName) {
@@ -26,10 +24,20 @@ var lazyObject = function() {
         },
 
         set: function(prop, value) {
-            if (!deferreds[prop]) {
-                deferreds[prop] = deferred();
+            if (!_.isString(prop) && !_.isObject(prop)) {
+                throw new Error('Error in lazyObject.set(): first argument should be a string or an object!');
             }
-            deferreds[prop].resolve(value);
+
+            if (_.isObject(prop)) {
+                _.each(prop, function(value, key) {
+                    this.set(key, value);
+                }, this);
+            } else {
+                if (!deferreds[prop]) {
+                    deferreds[prop] = deferred();
+                }
+                deferreds[prop].resolve(value);
+            }
         }
     };
 }
