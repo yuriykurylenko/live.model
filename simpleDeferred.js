@@ -68,7 +68,7 @@ var when = function() {
 
 
 
-var d1 = deferred();
+/*var d1 = deferred();
 var d2 = deferred();
 var d3 = deferred();
 
@@ -84,4 +84,4 @@ d2.resolve('success3');
 setTimeout(function() {
     d2.resolve('failure');
     d3.resolve('success4');
-}, 3000);
+}, 3000);*/
