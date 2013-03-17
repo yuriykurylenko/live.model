@@ -3,22 +3,22 @@ var lazyObject = function() {
 
     // Result returning
     return {
-        with: function(props, callback, scope) {
-            if (!_.isString(props) && !_.isArray(props)) {
+        with: function(keys, callback, scope) {
+            if (!_.isString(keys) && !_.isArray(keys)) {
                 throw new Error('Error in lazyObject.with(): first argument should be a string or an array!');
             }
             if (!_.isFunction(callback)) {
                 throw new Error('Error in lazyObject.with(): second argument should be a function!');
             }
 
-            props = _.isString(props) ? [ props ] : props
+            keys = _.isString(keys) ? [ keys ] : keys
 
-            var deferredValues = _.map(props, function(propName) {
-                if (!deferreds[propName]) {
-                    deferreds[propName] = deferred();
+            var deferredValues = _.map(keys, function(key) {
+                if (!deferreds[key]) {
+                    deferreds[key] = deferred();
                 }
 
-                return deferreds[propName];
+                return deferreds[key];
             });
 
             when.apply(null, deferredValues).done(function() {
@@ -26,20 +26,20 @@ var lazyObject = function() {
             });
         },
 
-        set: function(prop, value) {
-            if (!_.isString(prop) && !_.isObject(prop)) {
+        set: function(key, value) {
+            if (!_.isString(key) && !_.isObject(key)) {
                 throw new Error('Error in lazyObject.set(): first argument should be a string or an object!');
             }
 
-            if (_.isObject(prop)) {
-                _.each(prop, function(value, key) {
-                    this.set(key, value);
+            if (_.isObject(key)) {
+                _.each(key, function(value, k) {
+                    this.set(k, value);
                 }, this);
             } else {
-                if (!deferreds[prop]) {
-                    deferreds[prop] = deferred();
+                if (!deferreds[key]) {
+                    deferreds[key] = deferred();
                 }
-                deferreds[prop].resolve(value);
+                deferreds[key].resolve(value);
             }
         }
     };
