@@ -29,7 +29,7 @@ var deferred = function() {
             applyCallbacks();
         },
 
-        // For internal use only!
+        // For internal use inside when() only!
         getCurrentValue: function() {
             return value;
         }
@@ -37,22 +37,23 @@ var deferred = function() {
 };
 
 var when = function() {
-    var first = _.first(arguments),
-        rest = _.rest(arguments, 1);
+    var firstDeferred = _.first(arguments),
+        restOfDeferreds = _.rest(arguments, 1);
 
     return {
         done: function(callback, scope) {
-            first.done(function(value) {
-                if (rest.length == 0) {
+            firstDeferred.done(function(value) {
+                if (!restOfDeferreds.length) {
                     callback.call(scope, value);
                 } else {
-                    when.apply(null, rest).done(function() {
+                    when.apply(null, restOfDeferreds).done(function() {
                         callback.apply(
                             scope,
                             [].concat(
-                                [ first.getCurrentValue() ],
+                                [ firstDeferred.getCurrentValue() ],
 
-                                // arguments is not an array, and concat() doesn't work with it properly
+                                // transforming "arguments" variable to a real array
+                                // ("arguments" is not an array, and concat() doesn't work with it properly)
                                 _.map(arguments, function(arg) {
                                     return arg;
                                 })
