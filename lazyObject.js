@@ -14,20 +14,20 @@ var lazyObject = function() {
 
             var deferredValues = _.map(props, function(propName) {
                 if (!deferreds[propName]) {
-                    deferreds[propName] = $.Deferred();
+                    deferreds[propName] = deferred();
                 }
 
                 return deferreds[propName];
             });
 
-            $.when.apply(null, deferredValues).done(function() {
+            when.apply(null, deferredValues).done(function() {
                 callback.apply(scope, arguments);
             });
         },
 
         set: function(prop, value) {
             if (!deferreds[prop]) {
-                deferreds[prop] = $.Deferred();
+                deferreds[prop] = deferred();
             }
             deferreds[prop].resolve(value);
         }
