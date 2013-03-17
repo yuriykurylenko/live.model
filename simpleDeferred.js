@@ -27,6 +27,11 @@ var deferred = function() {
         resolve: function(val) {
             value = val;
             applyCallbacks();
+        },
+
+        // For internal use only!
+        getCurrentValue: function() {
+            return value;
         }
     }
 };
@@ -45,7 +50,7 @@ var when = function() {
                         callback.apply(
                             scope,
                             [].concat(
-                                [ value ],
+                                [ first.getCurrentValue() ],
 
                                 // arguments is not an array, and concat() doesn't work with it properly
                                 _.map(arguments, function(arg) {
@@ -53,7 +58,7 @@ var when = function() {
                                 })
                             )
                         );
-                    });
+                    }, scope);
                 }
             });
         }
@@ -66,13 +71,16 @@ var d1 = deferred();
 var d2 = deferred();
 var d3 = deferred();
 
-d2.resolve('failure');
+d1.resolve('failure');
+
+when(d1, d2, d3).done(function(v1, v2, v3) {
+    console.log(v1, v2, v3);
+});
+
+d1.resolve('success2');
+d2.resolve('success3');
 
 setTimeout(function() {
-    d2.resolve('success2');
-    d3.resolve('success3');
-}, 1050);
-
-when(d2, d3).done(function(v2, v3) {
-    console.log(v2, v3);
-});
+    d2.resolve('failure');
+    d3.resolve('success4');
+}, 3000);
