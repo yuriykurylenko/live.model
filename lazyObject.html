@@ -30,6 +30,25 @@
                 });
             }, 1000);
 
+            var d1 = deferred();
+            var d2 = deferred();
+            var d3 = deferred();
+
+            d1.resolve('failure');
+
+            when(d1, d2, d3).done(function(v1, v2, v3) {
+                console.log(v1, v2, v3);
+            });
+
+            d1.resolve('success2');
+            d2.resolve('success3');
+
+            setTimeout(function() {
+                d2.resolve('failure');
+                d3.resolve('success4');
+            }, 3000);
+
+
             l.with('lazy', 'aaaa');
         });
     </script>
