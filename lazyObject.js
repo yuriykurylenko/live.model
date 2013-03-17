@@ -4,11 +4,14 @@ var lazyObject = function() {
     // Result returning
     return {
         with: function(props, callback, scope) {
-            if (_.isString(props)) {
-                props = [ props ];
-            } else if (!_.isArray(props)) {
+            if (!_.isString(props) && !_.isArray(props)) {
                 throw new Error('Error in lazyObject.with(): first argument should be a string or an array!');
             }
+            if (!_.isFunction(callback)) {
+                throw new Error('Error in lazyObject.with(): second argument should be a function!');
+            }
+
+            props = _.isString(props) ? [ props ] : props
 
             var deferredValues = _.map(props, function(propName) {
                 if (!deferreds[propName]) {

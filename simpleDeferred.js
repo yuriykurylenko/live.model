@@ -14,6 +14,10 @@ var deferred = function() {
 
     return {
         done: function(callback, scope) {
+            if (!_.isFunction(callback)) {
+                throw new Error('Error in deferred.done(): first argument should be a function!');
+            }
+
             if (value) {
                 callback.call(scope, value);
             } else {
@@ -40,8 +44,20 @@ var when = function() {
     var firstDeferred = _.first(arguments),
         restOfDeferreds = _.rest(arguments, 1);
 
+    if (
+        !_.isFunction(firstDeferred.done) ||
+        !_.isFunction(firstDeferred.resolve) ||
+        !_.isFunction(firstDeferred.getCurrentValue)
+    ) {
+        throw new Error('Error in when(): all the arguments should be deferreds!');
+    }
+
     return {
         done: function(callback, scope) {
+            if (!_.isFunction(callback)) {
+                throw new Error('Error in when.done(): first argument should be a function!');
+            }
+
             firstDeferred.done(function(value) {
                 if (!restOfDeferreds.length) {
                     callback.call(scope, value);
