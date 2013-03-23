@@ -48,6 +48,9 @@
                 d3.resolve('success4');
             }, 3000);
 
+            when(d1, d2, d3).done(function(v1, v2, v3) {
+                console.log(v1, v2, v3);
+            });
 
             l.with('lazy', 'aaaa');
         });
