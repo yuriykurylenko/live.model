@@ -6,11 +6,12 @@
     <script src="simpleDeferred.js"></script>
     <script src="lazyObject.js"></script>
     <script src="value.js"></script>
+    <script src="validators.js"></script>
 
     <script type="text/javascript">
         $(function() {
             var v = value();
-            v.proxy({ url: '1.json' }).fetch();
+            v.validations(['required', 'number']).set('1453f');
 
             setTimeout(function() {
                 console.log(v.get());
