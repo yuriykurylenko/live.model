@@ -17,7 +17,7 @@ var value = function(data) {
             if (this.validate(val)) {
                 data = val;
             } else {
-                alert(validationErrors);
+                console.error(validationErrors);
             }
             return this;
         },
@@ -37,7 +37,7 @@ var value = function(data) {
         validate: function(val) {
             validationErrors = [];
             _.each(validationFunctions, function(validator, name) {
-                if (!validator(val)) {
+                if (!validator.call(this, val)) {
                     validationErrors.push(name);
                 }
             });
