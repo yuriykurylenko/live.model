@@ -1,0 +1,23 @@
+<html>
+<head>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+
+    <script src="simpleDeferred.js"></script>
+    <script src="lazyObject.js"></script>
+    <script src="value.js"></script>
+
+    <script type="text/javascript">
+        $(function() {
+            var v = value();
+            v.proxy({ url: '1.json' }).fetch();
+
+            setTimeout(function() {
+                console.log(v.get());
+            }, 100);
+        });
+    </script>
+</head>
+<body>
+</body>
+</html>
