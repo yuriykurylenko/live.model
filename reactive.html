@@ -1,0 +1,36 @@
+<html>
+<head>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+
+    <script src="simpleDeferred.js"></script>
+    <script src="lazyObject.js"></script>
+
+    <script type="text/javascript">
+        var state = {
+            clicks: {
+                initial: 0
+            }
+        }
+
+        var behavior = {
+            increment: function() {
+                this.state('clicks', this.state('clicks') + 1);
+            },
+
+            reset: function() {
+                this.state('clicks', 0);
+            }
+        }
+
+        $(function() {
+
+        });
+    </script>
+</head>
+<body>
+    <div id="clicks">{{clicks}} clicks performed</div>
+    <button data-behavior-click="increment"> + </button>
+    <button data-behavior-click="reset"> Reset </button>
+</body>
+</html>
