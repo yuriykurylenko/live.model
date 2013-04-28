@@ -47,9 +47,10 @@
 
 var stateful = function(obj) {
     var dependencies = {},
-        dependentObjects = {},
+        dependentObjects = [],
         stateComputers = {},
         stateChangeCallbacks = {},
+        noticeInitial = {},
         state = {};
 
     return {
@@ -72,6 +73,8 @@ var stateful = function(obj) {
                     this.object.on(eventName, _.bind(callback, this));
                 }, this);
             }
+
+            return this;
         },
 
         inject: function(deps) {
@@ -79,6 +82,8 @@ var stateful = function(obj) {
                 dependencies[key] = dep;
                 dep.addDependentObject(this);
             }, this);
+
+            return this;
         },
 
         takeOut: function(deps) {
@@ -90,7 +95,7 @@ var stateful = function(obj) {
         },
 
         addDependentObject: function(dep) {
-            dependentObjects.push(this);
+            dependentObjects.push(dep);
         },
 
         // Private methods
@@ -98,8 +103,10 @@ var stateful = function(obj) {
             return state[key];
         },
 
-        _setState: function(key, value) {
+        _setState: function(key, value, isInitial) {
             state[key] = value;
+
+            var omitCallback = isInitial && !noticeInitial[key];
 
             _.each(stateComputers, function(computer, stateName) {
                 if (stateName != key) {
@@ -107,7 +114,7 @@ var stateful = function(obj) {
                 }
             }, this);
 
-            if (_.isFunction(stateChangeCallbacks[key])) {
+            if (_.isFunction(stateChangeCallbacks[key]) && !omitCallback) {
                 stateChangeCallbacks[key].call(this, value);
             }
 
@@ -127,20 +134,22 @@ var stateful = function(obj) {
                 if (_.isFunction(stateConfig.change)) {
                     stateChangeCallbacks[stateName] = stateConfig.change;
                 }
-            });
 
-            if (_.isObject(config.initial)) {
-                _.each(config.initial, function(value, key) {
-                    this._setState(key, value);
-                }, this);
-            }
+                noticeInitial[stateName] = stateConfig.noticeInitial ? true : false;
+
+                if (!_.isUndefined(stateConfig.initial)) {
+                    this._setState(stateName, stateConfig.initial, true);
+                } else {
+                    this.callStateComputers(true);
+                }
+            }, this);
 
             return this;
         },
 
-        callStateComputers: function() {
+        callStateComputers: function(isInitial) {
             _.each(stateComputers, function(computer, stateName) {
-                this._setState(stateName, computer.call(this));
+                this._setState(stateName, computer.call(this), isInitial);
             }, this);
 
             return this;

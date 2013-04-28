@@ -1,8 +1,15 @@
 <html>
 <head>
     <style>
-        .error {
+        input.error {
             border: 1px solid red;
+            color: red;
+        }
+        span.error {
+            color: red;
+        }
+        span.success {
+            color: green;
         }
     </style>
 
@@ -14,8 +21,12 @@
     <script type="text/javascript">
         $(function() {
             var username = stateful($('#username')).state({
-                empty: {},
-                available: {},
+                empty: {
+                    initial: true,
+                },
+                available: {
+                    initial: false
+                },
                 valid: {
                     change: function(value) {
                         if (!value) {
@@ -35,10 +46,95 @@
                     this.state('empty', _.isEmpty(this.object.val()));
                 }
             });
+
+            var availability = stateful($('#availability')).inject({
+                'username': username
+            }).state({
+                ok: {
+                    change: function(value) {
+                        this.object.removeClass(value ? 'error' : 'success');
+                        this.object.addClass(value ? 'success' : 'error');
+                        this.object.html((value ? '' : 'Not ') + 'Available!');
+                    },
+
+                    compute: function() {
+                        return this.deps('username').state('available');
+                    }
+                }
+            });
+
+            var password = stateful($('#password')).state({
+                empty: {
+                    initial: true
+                },
+                strong: {},
+                valid: {
+                    change: function(value) {
+                        this.object.removeClass(value ? 'error' : 'success');
+                        this.object.addClass(value ? 'success' : 'error');
+                    },
+                    compute: function() {
+                        return !this.state('empty');
+                    }
+                }
+            }).behavior({
+                keyup: function() {
+                    var value = this.object.val();
+                    this.state('empty', _.isEmpty(value));
+                    this.state('strong', value.length >= 5);
+                }
+            });
+
+            var strength = stateful($('#strength')).inject({
+                password: password
+            }).state({
+                strong: {
+                    change: function(value) {
+                        this.object.removeClass(value ? 'error' : 'success');
+                        this.object.addClass(value ? 'success' : 'error');
+                        this.object.html(value ? 'Strong' : 'Weak');
+                    },
+
+                    compute: function() {
+                        return this.deps('password').state('strong');
+                    }
+                }
+            });
+
+            var button = stateful($('#button')).inject({
+                username: username,
+                password: password
+            }).state({
+                enabled: {
+                    noticeInitial: true,
+
+                    change: function(value) {
+                        if (value) {
+                            this.object.removeAttr('disabled');
+                        } else {
+                            this.object.attr('disabled', 'disabled');
+                        }
+                    },
+
+                    compute: function() {
+                        return this.deps('username').state('valid') && this.deps('password').state('valid');
+                    }
+                }
+            });
         });
     </script>
 </head>
 <body>
-    <input type="text" id="username" />
+    <div>
+        <input type="text" id="username" />
+        <span id="availability"></span>
+    </div>
+    <div>
+        <input type="password" id="password" />
+        <span id="strength"></span>
+    </div>
+    <div>
+        <button id="button">Register</button>
+    </div>
 </body>
 </html>
