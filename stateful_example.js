@@ -1,7 +1,9 @@
 $(function() {
     var username = stateful($('#username')).state({
         empty: {
-            initial: true,
+            compute: function() {
+                return !this.state('text');
+            }
         },
         available: {
             initial: false
@@ -18,11 +20,17 @@ $(function() {
             compute: function() {
                 return !this.state('empty') && this.state('available');
             }
+        },
+        text: {
+            initial: '',
+            change: function(value) {
+                this.object.val(value);
+            }
         }
     }).behavior({
         keyup: function() {
             this.state('available', (Math.random() > 0.5));
-            this.state('empty', _.isEmpty(this.object.val()));
+            this.state('text', this.object.val());
         }
     });
 
@@ -102,14 +110,16 @@ $(function() {
             }
         },
 
-        requestPending: {}
+        requestPending: {},
+        requestComplete: {}
     }).behavior({
         click: function() {
             var that = this;
             this.state('requestPending', true);
 
             setTimeout(function() {
-                that.state('requestPending', false)
+                that.state('requestPending', false);
+                that.state('requestComplete', true);
             }, 3000);
         }
     });
@@ -131,6 +141,27 @@ $(function() {
 
             compute: function() {
                 return this.deps('button').state('requestPending');
+            }
+        }
+    });
+
+    var message = stateful($('#message')).inject({
+        button: button
+    }).state({
+        visible: {
+            initial: false,
+            noticeInitial: true,
+
+            change: function(value) {
+                if (value) {
+                    this.object.show();
+                } else {
+                    this.object.hide();
+                }
+            },
+
+            compute: function() {
+                return this.deps('button').state('requestComplete');
             }
         }
     });

@@ -4,7 +4,8 @@ var stateful = function(obj) {
         stateComputers = {},
         stateChangeCallbacks = {},
         noticeInitial = {},
-        state = {};
+        state = {},
+        computed = [];
 
     return {
         object: obj,
@@ -23,7 +24,10 @@ var stateful = function(obj) {
         behavior: function(config) {
             if (_.isObject(config)) {
                 _.each(config, function(callback, eventName) {
-                    this.object.on(eventName, _.bind(callback, this));
+                    this.object.on(eventName, _.bind(function() {
+                        computed = [];
+                        callback.call(this);
+                    }, this));
                 }, this);
             }
 
@@ -57,13 +61,16 @@ var stateful = function(obj) {
         },
 
         _setState: function(key, value, isInitial) {
+            //console.log(this.object[0], key, value, computed);
             state[key] = value;
 
             var omitCallback = isInitial && !noticeInitial[key];
 
             _.each(stateComputers, function(computer, stateName) {
-                if (stateName != key) {
-                    this._setState(stateName, computer.call(this));
+                if (stateName != key && computed.indexOf(stateName) == -1) {
+                    //computed.push(stateName);
+                    //this._setState(stateName, computer.call(this));
+                    state[stateName] = computer.call(this);
                 }
             }, this);
 
@@ -89,7 +96,9 @@ var stateful = function(obj) {
                 }
 
                 noticeInitial[stateName] = stateConfig.noticeInitial ? true : false;
+            }, this);
 
+            _.each(config, function(stateConfig, stateName) {
                 if (!_.isUndefined(stateConfig.initial)) {
                     this._setState(stateName, stateConfig.initial, true);
                 } else {
