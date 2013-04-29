@@ -25,7 +25,6 @@ var stateful = function(obj) {
             if (_.isObject(config)) {
                 _.each(config, function(callback, eventName) {
                     this.object.on(eventName, _.bind(function() {
-                        computed = [];
                         callback.call(this);
                     }, this));
                 }, this);
@@ -61,25 +60,17 @@ var stateful = function(obj) {
         },
 
         _setState: function(key, value, isInitial) {
-            //console.log(this.object[0], key, value, computed);
             state[key] = value;
 
             var omitCallback = isInitial && !noticeInitial[key];
-
-            _.each(stateComputers, function(computer, stateName) {
-                if (stateName != key && computed.indexOf(stateName) == -1) {
-                    //computed.push(stateName);
-                    //this._setState(stateName, computer.call(this));
-                    state[stateName] = computer.call(this);
-                }
-            }, this);
+            this.callStateComputers(isInitial, key);
 
             if (_.isFunction(stateChangeCallbacks[key]) && !omitCallback) {
                 stateChangeCallbacks[key].call(this, value);
             }
 
             _.each(dependentObjects, function(dep) {
-                dep.callStateComputers();
+                dep.callStateComputers(isInitial);
             });
 
             return this;
@@ -99,7 +90,10 @@ var stateful = function(obj) {
             }, this);
 
             _.each(config, function(stateConfig, stateName) {
-                if (!_.isUndefined(stateConfig.initial)) {
+                if (
+                    !_.isUndefined(stateConfig.initial) &&
+                    this._getState(stateName) != stateConfig.initial
+                ) {
                     this._setState(stateName, stateConfig.initial, true);
                 } else {
                     this.callStateComputers(true);
@@ -109,9 +103,14 @@ var stateful = function(obj) {
             return this;
         },
 
-        callStateComputers: function(isInitial) {
+        callStateComputers: function(isInitial, omit) {
             _.each(stateComputers, function(computer, stateName) {
-                this._setState(stateName, computer.call(this), isInitial);
+                if (stateName != omit && computed.indexOf(stateName) == -1) {
+                    var computedState = computer.call(this);
+                    if (this._getState(stateName) != computedState) {
+                        this._setState(stateName, computer.call(this), isInitial);
+                    }
+                }
             }, this);
 
             return this;
